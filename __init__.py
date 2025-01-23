@@ -134,6 +134,8 @@ class PracticeTestDialog(QDialog):
         mw.col.save()
         mw.reset()
 
+        create_file_with_deck_name(new_deck_id, targetDeckName)
+
         showInfo(f"New deck '{newDeckName}' created with {cloned_count} cloned cards!")
         self.accept()  # Close the dialog
 
@@ -142,7 +144,7 @@ class PracticeTestDialog(QDialog):
 
 
 def add_practice_tests_option(menu, deckId):
-    action = menu.addAction('create quizz for 4000 essential english words')
+    action = menu.addAction('create quizz for 4000 essential english words 222')
     action.triggered.connect(PracticeTestDialog(mw, deckId).show)
 
 gui_hooks.deck_browser_will_show_options_menu.append(add_practice_tests_option)
@@ -177,7 +179,7 @@ def custom_review_button_action(reviewer:Reviewer, card: cards.Card, ease):
         return
 
     # specific deck
-    print("User press buttonith 111 ", ease)
+    print("[custom_review_button_action] User press button: ", ease)
 
     # print("=========== card info ===========")
     # print_card_info(card)
@@ -186,7 +188,6 @@ def custom_review_button_action(reviewer:Reviewer, card: cards.Card, ease):
 
     startTime = card.timer_started
     isCorrect = compare_answers(reviewer.typeCorrect, reviewer.typedAnswer)
-
     save_review_data(deckId, reviewer.typeCorrect, reviewer.typedAnswer, startTime, isCorrect)
     # Call the default action
     print("override ease: ", ease)
@@ -201,7 +202,7 @@ def custom_reviewer_will_answer_card(
  ease_tuple: tuple[bool, Literal[1, 2, 3, 4]], reviewer, card: cards.Card
 ) -> tuple[bool, Literal[1, 2, 3, 4]]:
     # Modify the ease rating if certain conditions are met
-    print("ease_tuple: ", ease_tuple)
+    print("[custom_reviewer_will_answer_card] ease_tuple: ", ease_tuple)
     should_continue, ease = ease_tuple
     if isSpecialDeck():
         ease = 4  # Always rate as 'Easy' for the special deck
@@ -241,8 +242,7 @@ def customNumberOfButtons(buttons_tuple, reviewer, card):
     if not isSpecialDeck():
         return buttons_tuple
     button_count = mw.col.sched.answerButtons(card)
-    print("button_count: ", button_count)
-    print("path collection.path: ", mw.col.path)
+    print("[customNumberOfButtons] button_count: ", button_count)
 
     customButton = []
     customButton.append((4, "Submit"))
@@ -289,6 +289,24 @@ def compare_answers(correct: str, answer: str) -> bool:
     return correct_parts == answer_parts
 
 
+
+def create_file_with_deck_name(deck_id: any, cloned_deck_name: str):
+    """
+    Create a file with the deck's ID and deck name as the file name.
+
+    Args:
+        deck_id (str): The ID of the deck.
+        cloned_deck_name (str): The name of the cloned deck.
+    """
+    # Ensure the filename is safe for the filesystem
+    fileName = f"{deck_id}_{cloned_deck_name}.txt"
+    fileName = fileName.strip().replace(" ", "_")
+    print("[create_file_with_deck_name] fileName: ", fileName)
+
+    # Create an empty file
+    with open(fileName, 'w') as file:
+        pass  # Just create the file without writing any data
+
 def save_review_data(deck_id:any, type_correct:str, typed_answer:str, time_start: int, isCorrect: bool):
     """
     Save review data to a CSV file named after the deck ID.
@@ -300,6 +318,7 @@ def save_review_data(deck_id:any, type_correct:str, typed_answer:str, time_start
         time_start (datetime): The start time of the review.
     """
     filename = f"{deck_id}.csv"
+    print("[save_review_data] filename: ", filename)
     fieldnames = ['typeCorrect', 'typedAnswer', 'timeStart', 'timeEnd', 'timeTakenInSec', 'isCorrect']
     # Get the current time in seconds since the epoch
     current_time = time.time()
@@ -312,18 +331,22 @@ def save_review_data(deck_id:any, type_correct:str, typed_answer:str, time_start
     # Format the datetime object as a string
     timeTakenInSec = current_time - time_start
 
-    with open(filename, mode='a', newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=fieldnames)
+    try:
+        with open(filename, mode='a', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
 
-        # Write the header only if the file is empty
-        if file.tell() == 0:
-            writer.writeheader()
+            # Write the header only if the file is empty
+            if file.tell() == 0:
+                writer.writeheader()
 
-        writer.writerow({
-            'typeCorrect': type_correct,
-            'typedAnswer': typed_answer,
-            'timeStart': startDateTime.strftime('%Y-%m-%d %H:%M:%S'),
-            'timeEnd': currentDateTime.strftime('%Y-%m-%d %H:%M:%S'),
-            'timeTakenInSec': timeTakenInSec,
-            'isCorrect': isCorrect
-        })
+            writer.writerow({
+                'typeCorrect': type_correct,
+                'typedAnswer': typed_answer,
+                'timeStart': startDateTime.strftime('%Y-%m-%d %H:%M:%S'),
+                'timeEnd': currentDateTime.strftime('%Y-%m-%d %H:%M:%S'),
+                'timeTakenInSec': timeTakenInSec,
+                'isCorrect': isCorrect
+            })
+        print("[save_review_data] Data saved successfully.")
+    except Exception as e:
+        print(f"[save_review_data] Failed to save data: {e}")
