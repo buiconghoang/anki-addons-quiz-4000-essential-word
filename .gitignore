@@ -1,3 +1,6 @@
 .idea
 .venv
 \d+.csv
+*.csv
+*.txt
+__pycache__/

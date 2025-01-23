@@ -298,13 +298,16 @@ def create_file_with_deck_name(deck_id: any, cloned_deck_name: str):
         deck_id (str): The ID of the deck.
         cloned_deck_name (str): The name of the cloned deck.
     """
+    dirname = os.path.dirname(__file__)
     # Ensure the filename is safe for the filesystem
     fileName = f"{deck_id}_{cloned_deck_name}.txt"
     fileName = fileName.strip().replace(" ", "_")
-    print("[create_file_with_deck_name] fileName: ", fileName)
+    filePath = os.path.join(dirname, fileName)
+
+    print("[create_file_with_deck_name] filePath: ", filePath)
 
     # Create an empty file
-    with open(fileName, 'w') as file:
+    with open(filePath, 'w') as file:
         pass  # Just create the file without writing any data
 
 def save_review_data(deck_id:any, type_correct:str, typed_answer:str, time_start: int, isCorrect: bool):
@@ -317,8 +320,9 @@ def save_review_data(deck_id:any, type_correct:str, typed_answer:str, time_start
         typed_answer (str): The typed answer.
         time_start (datetime): The start time of the review.
     """
-    filename = f"{deck_id}.csv"
-    print("[save_review_data] filename: ", filename)
+    # Get the directory name of the current file
+    dirname = os.path.dirname(__file__)
+    filePath = os.path.join(dirname, f"{deck_id}.csv")
     fieldnames = ['typeCorrect', 'typedAnswer', 'timeStart', 'timeEnd', 'timeTakenInSec', 'isCorrect']
     # Get the current time in seconds since the epoch
     current_time = time.time()
@@ -332,7 +336,7 @@ def save_review_data(deck_id:any, type_correct:str, typed_answer:str, time_start
     timeTakenInSec = current_time - time_start
 
     try:
-        with open(filename, mode='a', newline='') as file:
+        with open(filePath, mode='a', newline='') as file:
             writer = csv.DictWriter(file, fieldnames=fieldnames)
 
             # Write the header only if the file is empty
@@ -347,6 +351,6 @@ def save_review_data(deck_id:any, type_correct:str, typed_answer:str, time_start
                 'timeTakenInSec': timeTakenInSec,
                 'isCorrect': isCorrect
             })
-        print("[save_review_data] Data saved successfully.")
+        print(f"[save_review_data] Data saved successfully. {filePath}")
     except Exception as e:
-        print(f"[save_review_data] Failed to save data: {e}")
+        print(f"[save_review_data] Failed to save data {filePath}; err: {e}")
