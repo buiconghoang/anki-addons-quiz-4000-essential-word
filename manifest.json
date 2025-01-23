@@ -1,0 +1,7 @@
+{
+  "name": "4000 essential English words quiz",
+  "description": "Create a deck for quiz of 4000 essential English words",
+  "author": "buihoang",
+  "version": "1.0.0",
+  "supported": ["Version 24.11 (87ccd24e) (Python 3.9.18 Qt 6.6.2 PyQt 6.6.1)"]
+}
